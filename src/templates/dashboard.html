@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>pactracc. ~ find your package!</title>
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div class="alert">
+      {{ message }}
+      <button
+        type="button"
+        class="close"
+        data-dismiss="alert"
+        aria-label="Close"
+        onclick="this.parentElement.style.display='none';"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endfor %} {% endif %} {% endwith %}
+    <style>
+      #map {
+        height: 400px;
+        width: 100%;
+      }
+      table {
+        border-collapse: collapse;
+        width: 50%;
+        margin: auto;
+      }
+      th,
+      td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCpXoq5PsbhuX5VyzGuCW1TaPSjheshpxE"></script>
+  </head>
+  <body>
+    <div>
+      <h1 style="float: left">pactracc.</h1>
+      <p style="float: right">
+        Logged in as {{user.username}} <a href="/logout">Logout.</a>
+      </p>
+    </div>
+    <div id="map"></div>
+    <br />
+    <form
+      style="text-align: center"
+      enctype="multipart/form-data"
+      autocomplete="off"
+      method="post"
+    >
+      <input
+        type="text"
+        name="tracking_code"
+        placeholder="Tracking Number #"
+        required
+      />
+      <select name="carrier" id="carrier" placeholder="Select Carrier" required>
+        <option value="" disabled selected>Select Carrier</option>
+        <option value="AmazonMws">AmazoncMws</option>
+        <option value="APC">APC</option>
+        <option value="AsendiaUsa">AsendiacUSA</option>
+        <option value="AustraliaPost">Australia Post</option>
+        <option value="AxlehireV3">AxlehireV3</option>
+        <option value="BetterTrucks">BetterTrucks</option>
+        <option value="CanadaPost">Canada Post</option>
+        <option value="Canpar">Canpar</option>
+        <option value="ColumbusLastMile">ColumbusLastMile</option>
+        <option value="Chronopost">Chronopost</option>
+        <option value="CloudSort">CloudSort</option>
+        <option value="CourierExpress">CourierExpress</option>
+        <option value="CouriersPlease">CouriersPlease</option>
+        <option value="DaiPost">DaiPost</option>
+        <option value="DeliverIt">DeliverIt</option>
+        <option value="DeutschePost">Deutsche Post</option>
+        <option value="DeutschePostUK">Deutsche Post UK</option>
+        <option value="DHLEcommerceAsia">DHL Ecommerce Asia</option>
+        <option value="DhlEcs">Dhl Ecs</option>
+        <option value="DHLExpress">DHL Express</option>
+        <option value="DHLPaket">DHL Paket</option>
+        <option value="DHLSmartmail">DHL Smartmail</option>
+        <option value="DPD">DPD</option>
+        <option value="DPDNL">DPDNL</option>
+        <option value="DPDUK">DPDUK</option>
+        <option value="ePostGlobal">ePostGlobal</option>
+        <option value="Estafeta">Estafeta</option>
+        <option value="Evri">Evri</option>
+        <option value="Fastway">Fastway</option>
+        <option value="FedEx">FedEx</option>
+        <option value="FedExCrossBorder">FedEx CrossBorder</option>
+        <option value="FedExMailview">FedEx Mailview</option>
+        <option value="FedexSmartPost">Fedex Smart Post</option>
+        <option value="FirstMile">FirstMile</option>
+        <option value="GSO">GSO</option>
+        <option value="Hailify">Hailify</option>
+        <option value="InterlinkExpress">Interlink Express</option>
+        <option value="JPPost">JPPost</option>
+        <option value="KuronekoYamato">Kuroneko Yamato</option>
+        <option value="LaPoste">La Poste</option>
+        <option value="LaserShipV2">Laser Ship V2</option>
+        <option value="LoomisExpress">Loomis Express</option>
+        <option value="LSO">LSO</option>
+        <option value="Maergo">Maergo</option>
+        <option value="Newgistics">Newgistics</option>
+        <option value="OnTrac">OnTrac</option>
+        <option value="Optima">Optima</option>
+        <option value="OsmWorldwide">OsmWorldwide</option>
+        <option value="Parcelforce">Parcelforce</option>
+        <option value="Parcll">Parcll</option>
+        <option value="PassportGlobal">Passport Global</option>
+        <option value="PostNL">Post NL</option>
+        <option value="Purolator">Purolator</option>
+        <option value="RoyalMail">Royal Mail</option>
+        <option value="OmniParcel">Omni Parcel</option>
+        <option value="Sendle">Sendle</option>
+        <option value="SFExpress">SF Express</option>
+        <option value="SmartKargo">Smart Kargo</option>
+        <option value="Sonic">Sonic</option>
+        <option value="SpeeDee">SpeeDee</option>
+        <option value="Swyft">Swyft</option>
+        <option value="TForce">TForce</option>
+        <option value="Toll">Toll</option>
+        <option value="UDS">UDS</option>
+        <option value="UPS">UPS</option>
+        <option value="UPSIparcel">UPS Iparcel</option>
+        <option value="UPSMailInnovations">UPS Mail Innovations</option>
+        <option value="USPS">USPS</option>
+        <option value="Veho">Veho</option>
+        <option value="Yanwen">Yanwen</option>
+      </select>
+      <button type="submit">Submit</button>
+    </form>
+    <br />
+    <div class="table-container">
+      <table id="tracking-table">
+        <thead>
+          <tr>
+            <th>Tracking number</th>
+            <th>Carrier</th>
+            <th>Estimated delivery</th>
+            <th>Last update</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <script>
+      var globalData = null;
+      var map;
+
+      document.addEventListener("DOMContentLoaded", fetchData);
+      google.maps.event.addDomListener(window, "load", function () {
+        if (globalData !== null) {
+          initMap(globalData);
+        }
+      });
+
+      async function fetchData() {
+        try {
+          const response = await fetch("/data");
+          const data = await response.json();
+          globalData = data.packages;
+          populateTable(globalData);
+          initMap(globalData);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+
+      function populateTable(data) {
+        const tableBody = document.getElementById("table-body");
+
+        data.forEach((item) => {
+          const row = document.createElement("tr");
+          item = JSON.parse(item);
+
+          row.innerHTML = `
+            <td>${item.tracking_code}</td>
+            <td>${item.carrier.replace(/_/g, " ")}</td>
+            <td>${item.est_delivery_date} ${item.est_delivery_time}</td>
+            <td>${item.latest_update.datetime}</td>
+            <td>${item.latest_update.tracking_location.city.toUpperCase()}, ${
+            item.latest_update.tracking_location.state
+          }</td>
+            <td>${item.latest_update.status
+              .replace(/_/g, " ")
+              .toUpperCase()}</td>
+            <td><button type="button" onClick=deleteTracker("${
+              item.tracking_code
+            }")>&#10006</button></td>
+        `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      function initMap(data) {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 39.5, lng: -98.35 },
+          zoom: 4,
+        });
+        data.forEach((package) => {
+          const coordinates =
+            JSON.parse(package).latest_update.tracking_location.coordinates;
+          const tracking_code = JSON.parse(package).tracking_code;
+
+          const latLng = new google.maps.LatLng(
+            coordinates.lat,
+            coordinates.lng
+          );
+
+          const marker = new google.maps.Marker({
+            position: latLng,
+            map: map,
+          });
+          
+          const infoWindow = new google.maps.InfoWindow({
+            content: tracking_code,
+          });
+
+          marker.addListener("click", () => {
+            infoWindow.open(map, marker);
+          });
+          
+
+        });
+
+        /*
+            {% for marker in markers %}
+                new google.maps.Marker({
+                    position: {lat: {{ marker.lat }}, lng: {{ marker.lng }}},
+                    map: map
+                });
+            {% endfor %}
+        */
+      }
+
+      function deleteTracker(tracking_code) {
+        fetch("/delete-tracker", {
+          method: "POST",
+          body: JSON.stringify({ tracking_code: tracking_code }),
+        }).then((_res) => {
+          window.location.href = "/dashboard";
+        });
+      }
+      
+    </script>
+  </body>
+</html>
